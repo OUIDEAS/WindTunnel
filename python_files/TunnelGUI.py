@@ -14,7 +14,7 @@ pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 
 
-ui_class, base_class = pg.Qt.loadUiType("desginer_ui.ui")
+ui_class, base_class = pg.Qt.loadUiType("python_files/desginer_ui.ui")
 
 
 class MainWindow(ui_class, base_class):
