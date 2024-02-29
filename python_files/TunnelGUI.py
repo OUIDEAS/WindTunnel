@@ -61,14 +61,34 @@ class MainWindow(ui_class, base_class):
         # Other Settings
         self.console_port = serial.Serial('COM9', 115200)   # console port (write)
         self.data_port = serial.Serial('COM10', 115200)     # data port (read)
-        self.setup_timer()                                  
+        self.setup_timer()  
+        self.density = 1.0
+        self.init_values()                                
         
         # Fan speed control
         self.sendDuty.clicked.connect(self.specific_entry)  # send button calls send duty% function
         self.manualDuty.editingFinished.connect(self.specific_entry) # value sent if 'enter'key hit
         self.tareVelocity.clicked.connect(self.tare_vel)    # tare button calls tare function
         self.initDP = 0.0                                   # initial diff. pressure for tare
-      
+        
+    def init_values(self):
+        duration = 5
+        dens_values = []
+
+        start_time = time.time()
+        while time.time() - start_time < duration:                    
+            time.sleep(0.1)                                          
+            data = self.get_data(self.console_port, self.data_port)  
+            temp_K = data[1] + 273.15                                            
+            press_Pa = data[0] * 100 
+            dens = press_Pa / (287.0 * temp_K)
+            dens_values.append(dens)                                                                              
+            print("Initializing Density ...")
+
+        if dens_values:    
+            self.density = sum(dens_values) / len(dens_values) # takes the average density value and sets dense = to 
+            print("Average Density Value:", self.density)
+        
 
 
     def start_plot(self):
@@ -207,9 +227,7 @@ class MainWindow(ui_class, base_class):
         press_Kpa = press_Pa / 1000                                  # pressure converted into KPa
         diff_press = data[2]                         
         humidity = data[3]
-        temp_K = temp_C + 273.15                                     # temp converted into Kelvin
-        dens = press_Pa / (287.0 * temp_K)                           # density calculated for use in velocity equation
-        vel_MPS = (2 * max(diff_press-self.initDP, 0) / dens)**0.5   # calculate velocity
+        vel_MPS = (2 * max(diff_press-self.initDP, 0) / self.density)**0.5   # calculate velocity
 
         self.tempLCD.display(temp_C)                                 # display temp on LCD
         self.pressureLCD.display(press_Kpa)                          # display pressure on LCD
