@@ -180,7 +180,7 @@ class MainWindow(ui_class, base_class):
     def setup_timer(self):                                           # timer setup for data collection and updates
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_data)
-        self.timer.start(10)                                         #10 ms delay on data collection (limited by sensor comm)
+        self.timer.start(200)                                         #200 ms delay on data collection (limited by sensor comm)
 
 
     def update_data(self):
