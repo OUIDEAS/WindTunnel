@@ -65,6 +65,7 @@ class MainWindow(ui_class, base_class):
         
         # Fan speed control
         self.sendDuty.clicked.connect(self.specific_entry)  # send button calls send duty% function
+        self.manualDuty.editingFinished.connect(self.specific_entry) # value sent if 'enter'key hit
         self.tareVelocity.clicked.connect(self.tare_vel)    # tare button calls tare function
         self.initDP = 0.0                                   # initial diff. pressure for tare
       
