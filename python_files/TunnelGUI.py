@@ -63,7 +63,9 @@ class MainWindow(ui_class, base_class):
         self.data_port = serial.Serial('COM10', 115200)     # data port (read)
         self.setup_timer()  
         self.density = 1.0
-        self.init_values()                                
+        self.init_values()   
+        self.vel_window = []                                # List to store velocity values
+        self.vel_window_size = 10                           # Size of the moving average window                             
         
         # Fan speed control
         self.sendDuty.clicked.connect(self.specific_entry)  # send button calls send duty% function
@@ -225,14 +227,20 @@ class MainWindow(ui_class, base_class):
         temp_C = data[1]                                             # uses data from update_data update lcds
         press_Pa = data[0] * 100                                     # pressure converted into Pascals
         press_Kpa = press_Pa / 1000                                  # pressure converted into KPa
-        diff_press = data[2]                         
+        dp = data[2]                         
         humidity = data[3]
-        vel_MPS = (2 * max(diff_press-self.initDP, 0) / self.density)**0.5   # calculate velocity
+        vel_MPS = (2 * max(dp-self.initDP, 0) / self.density)**0.5   # calculate velocity
+
+        self.vel_window.append(vel_MPS)
+        if len(self.vel_window) > self.vel_window_size:
+            self.vel_window.pop(0)                                   # removes oldest velocity from window
+
+        avg_vel = sum(self.vel_window) / len(self.vel_window) if self.vel_window else 0
 
         self.tempLCD.display(temp_C)                                 # display temp on LCD
         self.pressureLCD.display(press_Kpa)                          # display pressure on LCD
         self.humLCD.display(humidity)                                # display humidity on LCD
-        self.actualLCD.display(vel_MPS)                              # display actual velocity on LCD
+        self.actualLCD.display(avg_vel)                              # display avg velocity on LCD
 
 
 if __name__ == '__main__':
