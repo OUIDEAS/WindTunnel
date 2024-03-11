@@ -161,7 +161,7 @@ def send_data(port, num_samples):
 i2c = board.STEMMA_I2C()
 
 # init pwm 
-pwm = pwmio.PWMOut(board.D10)  # pwm sent to pin 10
+pwm = pwmio.PWMOut(board.D9, frequency=25000)  # pwm sent to pin 10
 pwm.duty_cycle = 0  # start at lowest duty cycle
 
 # init sensors
