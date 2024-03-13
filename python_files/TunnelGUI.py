@@ -72,7 +72,7 @@ class MainWindow(ui_class, base_class):
         self.manualDuty.editingFinished.connect(self.specific_entry) # value sent if 'enter'key hit
         self.tareVelocity.clicked.connect(self.tare_vel)    # tare button calls tare function
         self.initDP = 0.0                                   # initial diff. pressure for tare
-        self.pwm_Range_Enabled = False                      # Ramps PWM 0-100% if True (for troubleshooting)  
+        self.pwm_Range_Enabled = True                      # Ramps PWM 0-100% if True (for troubleshooting)  
         self.current_pwm = 0
         self.pwm_Range_Timer = QTimer()
         self.pwm_Range_Timer.timeout.connect(self.increase_pwm)
@@ -198,9 +198,10 @@ class MainWindow(ui_class, base_class):
             self.desiredLCD.display(self.current_pwm)
             self.update_data
         else:
-            self.pwm_Range_Time.stop()                               # stops timer when pwm reaches 100%
             self.current_pwm = 0
+            self.desiredLCD.display(self.current_pwm)
             self.update_data
+            self.pwm_Range_Timer.stop()                               # stops timer when pwm reaches 100%
 
 
     def tare_vel(self):
