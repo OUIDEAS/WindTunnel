@@ -205,10 +205,10 @@ class MainWindow(ui_class, base_class):
 
 
     def tare_vel(self):
-       duration = 5
+       duration = 10
        dp_values = []
        start_time = time.time()
-       while time.time() - start_time < duration:                    # 5 second while loop
+       while time.time() - start_time < duration:                    # 10 second while loop
             time.sleep(0.1)                                          # 0.1 second delay
             data = self.get_data(self.console_port, self.data_port)  # gets data
             dp = data[2]                                             # gets diff. pressure from get_data function
