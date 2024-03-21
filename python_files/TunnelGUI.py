@@ -77,25 +77,43 @@ class MainWindow(ui_class, base_class):
         self.pwm_Range_Timer = QTimer()
         self.pwm_Range_Timer.timeout.connect(self.increase_pwm)
         
+
     def init_values(self):
         duration = 5
-        dens_values = []
+        dens_vals = []
+        press_vals = []
+        hum_vals = []
+        temp_vals = []
 
         start_time = time.time()
         while time.time() - start_time < duration:                    
             time.sleep(0.1)                                          
             data = self.get_data(self.console_port, self.data_port)  
+            hum = data[3]
             temp_K = data[1] + 273.15                                            
             press_Pa = data[0] * 100 
-            dens = press_Pa / (287.0 * temp_K)
-            dens_values.append(dens)                                                                              
-            print("Initializing Density ...")
+            dens = press_Pa / (287.058 * temp_K)
+            dens_vals.append(dens)
+            press_vals.append(press_Pa)
+            hum_vals.append(hum)
+            temp_vals.append(temp_K - 273.15)
+            print("Initializing Environmental Conditions ...")
 
-        if dens_values:    
-            self.density = sum(dens_values) / len(dens_values) # takes the average density value and sets dense = to 
-            print("Average Density Value:", self.density)
+        if dens_vals:    
+            self.density = sum(dens_vals) / len(dens_vals) # takes the average density value and sets dense = to 
+            self.pressure = sum(press_vals) / len(press_vals)
+            self.humidity = sum(hum_vals) / len(hum_vals)
+            self.temperature = sum(temp_vals) / len(temp_vals)
+            print("Average Density: ", self.density)
+            print("Average Pressure: ", self.pressure)
+            print("Average Humidity: ", self.humidity)
+            print("Average Temperature: ", self.temperature)
+
+            self.tempLCD.display(self.temperature)                                
+            self.pressureLCD.display(self.pressure / 1000)                     
+            self.humLCD.display(self.humidity)                                               
+            self.densityLCD.display(self.density)                      
         
-
 
     def start_plot(self):
         ms = int((1/self.sampleRate.value())*1000)          # sets time delay based on user-set record Hz
@@ -129,6 +147,7 @@ class MainWindow(ui_class, base_class):
         temp = self.tempLCD.value()
         hum = self.humLCD.value()
         pressure = self.pressureLCD.value()
+        density = self.densityLCD.value()
         actual_vel = self.actualLCD.value()
         duty_percent = self.desiredLCD.value()
 
@@ -154,6 +173,9 @@ class MainWindow(ui_class, base_class):
 
         if self.checkBox_3.isChecked():
             recorded_data_point["temp"] = temp
+
+        if self.checkBox_4.isChecked():
+            recorded_data_point["density"] = density
 
         self.recorded_data.append(recorded_data_point)
 
@@ -182,7 +204,6 @@ class MainWindow(ui_class, base_class):
         print(f"Data saved to: {filename}")
 
 
-
     def specific_entry(self):
         number = self.manualDuty.value()                             # saves the number that is input by the user for Duty Cycle
         self.desiredLCD.display(number)                              # sets manual numbered entered as the Duty Cycle LCD value        
@@ -191,6 +212,7 @@ class MainWindow(ui_class, base_class):
             self.pwm_Range_Timer.start(10000)
             self.current_pwm = 0
             self.increase_pwm()
+
 
     def increase_pwm(self):                                          # function to increase the pwm by 5% every 10s
         if self.current_pwm <= 95:                                  # checks if current commanded pwm is under 100%
@@ -245,13 +267,15 @@ class MainWindow(ui_class, base_class):
 
     def update_lcds(self, data):                                     # update_lcds function
         temp_C = data[1]                                             # uses data from update_data update lcds
+        temp_K = temp_C + 273.15                                     # temp converted into Kelvin
         press_Pa = data[0] * 100                                     # pressure converted into Pascals
         press_Kpa = press_Pa / 1000                                  # pressure converted into KPa
-        dp = data[2]                         
-        humidity = data[3]
-        vel_MPS = (2 * max(dp-self.initDP, 0) / self.density)**0.5   # calculate velocity
+        dp = data[2]
+        dens_kgm3 = press_Pa / (287.058 * temp_K)                   
+        hum = data[3]
+        vel_mps = (2 * max(dp-self.initDP, 0) / dens_kgm3)**0.5      # calculate velocity
 
-        self.vel_window.append(vel_MPS)
+        self.vel_window.append(vel_mps)
         if len(self.vel_window) > self.vel_window_size:
             self.vel_window.pop(0)                                   # removes oldest velocity from window
 
@@ -259,9 +283,27 @@ class MainWindow(ui_class, base_class):
 
         self.tempLCD.display(temp_C)                                 # display temp on LCD
         self.pressureLCD.display(press_Kpa)                          # display pressure on LCD
-        self.humLCD.display(humidity)                                # display humidity on LCD
+        self.humLCD.display(hum)                                     # display humidity on LCD
         self.actualLCD.display(avg_vel)                              # display avg velocity on LCD
+        self.densityLCD.display(dens_kgm3)                           # display density on LCD
 
+
+    def update_lcds_AVG(self, data):
+        temp_C = self.temperature
+        temp_K = temp_C + 273.15
+        press_Pa = self.pressure
+        press_Kpa = press_Pa / 1000
+        dens_kgm3 = self.density
+        hum = self.humidity
+        dp = data[2]
+        vel_mps = (2 * max(dp-self.initDP, 0) / dens_kgm3)**0.5
+
+        self.vel_window.append(vel_mps)
+        if len(self.vel_window) > self.vel_window_size:
+            self.vel_window.pop(0)                                  
+
+        avg_vel = sum(self.vel_window) / len(self.vel_window) if self.vel_window else 0
+        
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
