@@ -3,6 +3,7 @@ import time
 import serial
 import os
 import csv
+import argparse
 import pyqtgraph as pg
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
@@ -19,7 +20,7 @@ ui_class, base_class = pg.Qt.loadUiType("python_files/desginer_ui.ui")
 
 class MainWindow(ui_class, base_class):
 
-    def __init__(self):
+    def __init__(self, avg_mode=False):
         super().__init__()
 
         # Plot Creation and Initialization
@@ -63,20 +64,25 @@ class MainWindow(ui_class, base_class):
         self.data_port = serial.Serial('COM10', 115200)     # data port (read)
 
         # Other Settings
+        self.avg_mode = avg_mode                            # Determines Env.Cond. variable mode
+        self.pwm_Range_Enabled = False                      # Ramps PWM 0-100% if True (for troubleshooting) 
         self.setup_timer()  
         self.init_values() 
         self.density = 1.0
+        self.hum_window = []
+        self.dens_window = []
+        self.temp_window = []
+        self.press_window = []
         self.vel_window = []                                # List to store velocity values
-        self.vel_window_size = 10                           # Size of the moving average window                             
+        self.window_size = 10                               # Size of the moving average window                             
         self.sendDuty.clicked.connect(self.specific_entry)  # send button calls send duty% function
         self.manualDuty.editingFinished.connect(self.specific_entry) # value sent if 'enter'key hit
         self.tareVelocity.clicked.connect(self.tare_vel)    # tare button calls tare function
         self.initDP = 0.0                                   # initial diff. pressure for tare
-        self.pwm_Range_Enabled = False                      # Ramps PWM 0-100% if True (for troubleshooting)  
         self.current_pwm = 0
         self.pwm_Range_Timer = QTimer()
         self.pwm_Range_Timer.timeout.connect(self.increase_pwm)
-        
+
 
     def init_values(self):
         duration = 5
@@ -250,7 +256,11 @@ class MainWindow(ui_class, base_class):
 
     def update_data(self):
         data = self.get_data(self.console_port, self.data_port)      # calls the get_data function
-        self.update_lcds(data)                                       # calls the update_lcd function to update with new data
+        if self.avg_mode:                                            # checks if avg_mode is true/fale
+            self.update_lcds_AVG(data)                               # calls update_lcds_AVG if true
+        else:
+            self.update_lcds(data)                                   # calls update_lcd if false
+
         signal = int((self.desiredLCD.value()/100) * 65535)          # calculates signal based on 12 bit reso.(65535 values)
         send_pwm(self.console_port, signal)                          # calls the send_pwm function to send pwm to fan
 
@@ -273,40 +283,57 @@ class MainWindow(ui_class, base_class):
         dp = data[2]
         dens_kgm3 = press_Pa / (287.058 * temp_K)                   
         hum = data[3]
-        vel_mps = (2 * max(dp-self.initDP, 0) / dens_kgm3)**0.5      # calculate velocity
+        
+        self.dens_window.append(dens_kgm3)
+        self.hum_window.append(hum)
+        self.temp_window.append(temp_C)
+        self.press_window.append(press_Kpa)
+        if len(self.dens_window) > self.window_size:
+            self.dens_window.pop(0)
+        if len(self.hum_window) > self.window_size:
+            self.hum_window.pop(0)
+        if len(self.temp_window) > self.window_size:
+            self.temp_window.pop(0)
+        if len(self.press_window) > self.window_size:
+            self.press_window.pop(0)
 
+        avg_dens = sum(self.dens_window) / len(self.dens_window) if self.dens_window else 0
+        avg_hum = sum(self.hum_window) / len(self.hum_window) if self.hum_window else 0
+        avg_temp = sum(self.temp_window) / len(self.temp_window) if self.temp_window else 0
+        avg_press = sum(self.press_window) / len(self.press_window) if self.press_window else 0
+
+        vel_mps = (2 * max(dp-self.initDP, 0) / avg_dens)**0.5      # calculate velocity
         self.vel_window.append(vel_mps)
-        if len(self.vel_window) > self.vel_window_size:
+        if len(self.vel_window) > self.window_size:
             self.vel_window.pop(0)                                   # removes oldest velocity from window
-
         avg_vel = sum(self.vel_window) / len(self.vel_window) if self.vel_window else 0
-
-        self.tempLCD.display(temp_C)                                 # display temp on LCD
-        self.pressureLCD.display(press_Kpa)                          # display pressure on LCD
-        self.humLCD.display(hum)                                     # display humidity on LCD
+    
+        self.tempLCD.display(avg_temp)                               # display temp on LCD
+        self.pressureLCD.display(avg_press)                          # display pressure on LCD
+        self.humLCD.display(avg_hum)                                 # display humidity on LCD
         self.actualLCD.display(avg_vel)                              # display avg velocity on LCD
-        self.densityLCD.display(dens_kgm3)                           # display density on LCD
+        self.densityLCD.display(avg_dens)                            # display density on LCD
 
 
     def update_lcds_AVG(self, data):
-        temp_C = self.temperature
-        temp_K = temp_C + 273.15
-        press_Pa = self.pressure
-        press_Kpa = press_Pa / 1000
         dens_kgm3 = self.density
-        hum = self.humidity
         dp = data[2]
         vel_mps = (2 * max(dp-self.initDP, 0) / dens_kgm3)**0.5
 
         self.vel_window.append(vel_mps)
-        if len(self.vel_window) > self.vel_window_size:
+        if len(self.vel_window) > self.window_size:
             self.vel_window.pop(0)                                  
 
         avg_vel = sum(self.vel_window) / len(self.vel_window) if self.vel_window else 0
-        
+        self.actualLCD.display(avg_vel)
+
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--avg-mode', action='store_true', help='Use average update')
+    args = parser.parse_args()
+
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = MainWindow(avg_mode=args.avg_mode)
     window.show()
     sys.exit(app.exec_())

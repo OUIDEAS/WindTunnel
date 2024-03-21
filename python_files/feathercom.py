@@ -26,7 +26,7 @@ def send_pwm(console_port, pwm_val):
     :return: None
     """
     console_port.write(bytes(f"<P,{pwm_val}>", "ascii"))  # write a command to the feather updating the fan duty cycle
-    print("Sending pwm value", pwm_val)
+    # print("Sending pwm value", pwm_val)
 
 
 def request_data(console_port, data_port, num_samples):
