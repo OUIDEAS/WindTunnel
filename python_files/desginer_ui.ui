@@ -534,6 +534,19 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="LEDWidget" name="label">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>10</y>
+       <width>47</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_6">
     <property name="geometry">
@@ -583,6 +596,11 @@
    <extends>QWidget</extends>
    <header>pyqtgraph</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LEDWidget</class>
+   <extends>QLabel</extends>
+   <header>LEDwidget.py</header>
   </customwidget>
  </customwidgets>
  <resources/>

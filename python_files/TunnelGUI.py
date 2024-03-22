@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
 from pyqtgraph.Qt import QtCore
 from feathercom import *
+from LEDwidget import LEDWidget
 
 # setting pyqtgraph configuration options
 pg.setConfigOption('background', 'w')
@@ -60,12 +61,19 @@ class MainWindow(ui_class, base_class):
         os.makedirs(self.output_folder, exist_ok=True)
 
         # Serial Port Settings
-        self.console_port = serial.Serial('COM9', 115200)   # console port (write)
-        self.data_port = serial.Serial('COM10', 115200)     # data port (read)
+        self.console_port = serial.Serial('COM9', 115200)           # console port (write)
+        self.data_port = serial.Serial('COM10', 115200)             # data port (read)
+
+        # Mode Settings
+        self.avg_mode = avg_mode                                    # Determines Env.Cond. variable mode
+        self.pwm_Range_Enabled = False                              # Ramps PWM 0-100% if True (for troubleshooting) 
+        self.ledWidget = self.findChild(LEDWidget, "ledWidget")     # Adds custom ledWidget
+        if self.avg_mode:                                           # If AvgMode is selected, LED On.
+            self.ledWidget.turnOn()
+        else:
+            self.ledWidget.turnOff()
 
         # Other Settings
-        self.avg_mode = avg_mode                            # Determines Env.Cond. variable mode
-        self.pwm_Range_Enabled = False                      # Ramps PWM 0-100% if True (for troubleshooting) 
         self.setup_timer()  
         self.init_values() 
         self.density = 1.0
@@ -73,12 +81,12 @@ class MainWindow(ui_class, base_class):
         self.dens_window = []
         self.temp_window = []
         self.press_window = []
-        self.vel_window = []                                # List to store velocity values
-        self.window_size = 10                               # Size of the moving average window                             
-        self.sendDuty.clicked.connect(self.specific_entry)  # send button calls send duty% function
-        self.manualDuty.editingFinished.connect(self.specific_entry) # value sent if 'enter'key hit
-        self.tareVelocity.clicked.connect(self.tare_vel)    # tare button calls tare function
-        self.initDP = 0.0                                   # initial diff. pressure for tare
+        self.vel_window = []                                        # List to store velocity values
+        self.window_size = 10                                       # Size of the moving average window                             
+        self.sendDuty.clicked.connect(self.specific_entry)          # send button calls send duty% function
+        self.manualDuty.editingFinished.connect(self.specific_entry)# value sent if 'enter'key hit
+        self.tareVelocity.clicked.connect(self.tare_vel)            # tare button calls tare function
+        self.initDP = 0.0                                           # initial diff. pressure for tare
         self.current_pwm = 0
         self.pwm_Range_Timer = QTimer()
         self.pwm_Range_Timer.timeout.connect(self.increase_pwm)
@@ -221,7 +229,7 @@ class MainWindow(ui_class, base_class):
 
 
     def increase_pwm(self):                                          # function to increase the pwm by 5% every 10s
-        if self.current_pwm <= 95:                                  # checks if current commanded pwm is under 100%
+        if self.current_pwm <= 95:                                   # checks if current commanded pwm is under 100%
             self.current_pwm += 5                                    # if under, it adds 5% to current value
             self.desiredLCD.display(self.current_pwm)
             self.update_data
@@ -229,7 +237,7 @@ class MainWindow(ui_class, base_class):
             self.current_pwm = 0
             self.desiredLCD.display(self.current_pwm)
             self.update_data
-            self.pwm_Range_Timer.stop()                               # stops timer when pwm reaches 100%
+            self.pwm_Range_Timer.stop()                              # stops timer when pwm reaches 100%
 
 
     def tare_vel(self):
