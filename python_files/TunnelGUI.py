@@ -21,7 +21,7 @@ ui_class, base_class = pg.Qt.loadUiType("python_files/desginer_ui.ui")
 
 class MainWindow(ui_class, base_class):
 
-    def __init__(self, avg_mode=False):
+    def __init__(self, const_mode=False, pwmRange_mode=False):
         super().__init__()
 
         # Plot Creation and Initialization
@@ -65,13 +65,18 @@ class MainWindow(ui_class, base_class):
         self.data_port = serial.Serial('COM10', 115200)             # data port (read)
 
         # Mode Settings
-        self.avg_mode = avg_mode                                    # Determines Env.Cond. variable mode
-        self.pwm_Range_Enabled = False                              # Ramps PWM 0-100% if True (for troubleshooting) 
+        self.pwmRange_mode = pwmRange_mode                          # Ramps PWM 0-100% if True (for troubleshooting)                         
+        self.pwmRange_Timer = QTimer()
+        self.pwmRange_Timer.timeout.connect(self.increase_pwm)
+        self.const_mode = const_mode                                # Determines Env.Cond. variable mode
         self.ledWidget = self.findChild(LEDWidget, "ledWidget")     # Adds custom ledWidget
-        if self.avg_mode:                                           # If AvgMode is selected, LED On.
+        if self.const_mode:                                         # If ConstMode is selected, LED On.
             self.ledWidget.turnOn()
+            self.label.setText("ON")
+            self.label.setStyleSheet("text-transform: uppercase;")
         else:
-            self.ledWidget.turnOff()
+            self.label.setText("OFF")
+            self.label.setStyleSheet("text-transform: uppercase;")
 
         # Other Settings
         self.setup_timer()  
@@ -88,9 +93,7 @@ class MainWindow(ui_class, base_class):
         self.tareVelocity.clicked.connect(self.tare_vel)            # tare button calls tare function
         self.initDP = 0.0                                           # initial diff. pressure for tare
         self.current_pwm = 0
-        self.pwm_Range_Timer = QTimer()
-        self.pwm_Range_Timer.timeout.connect(self.increase_pwm)
-
+        
 
     def init_values(self):
         duration = 5
@@ -222,8 +225,8 @@ class MainWindow(ui_class, base_class):
         number = self.manualDuty.value()                             # saves the number that is input by the user for Duty Cycle
         self.desiredLCD.display(number)                              # sets manual numbered entered as the Duty Cycle LCD value        
         
-        if self.pwm_Range_Enabled:                                   # only active if pwm range is enabled, starts a 10s timer
-            self.pwm_Range_Timer.start(10000)
+        if self.pwmRange_mode:                                       # only active if pwm range is enabled, starts a 10s timer
+            self.pwmRange_Timer.start(10000)
             self.current_pwm = 0
             self.increase_pwm()
 
@@ -237,7 +240,7 @@ class MainWindow(ui_class, base_class):
             self.current_pwm = 0
             self.desiredLCD.display(self.current_pwm)
             self.update_data
-            self.pwm_Range_Timer.stop()                              # stops timer when pwm reaches 100%
+            self.pwmRange_Timer.stop()                              # stops timer when pwm reaches 100%
 
 
     def tare_vel(self):
@@ -264,8 +267,8 @@ class MainWindow(ui_class, base_class):
 
     def update_data(self):
         data = self.get_data(self.console_port, self.data_port)      # calls the get_data function
-        if self.avg_mode:                                            # checks if avg_mode is true/fale
-            self.update_lcds_AVG(data)                               # calls update_lcds_AVG if true
+        if self.const_mode:                                            # checks if const_mode is true/fale
+            self.update_lcds_CONST(data)                               # calls update_lcds_CONST if true
         else:
             self.update_lcds(data)                                   # calls update_lcd if false
 
@@ -323,7 +326,7 @@ class MainWindow(ui_class, base_class):
         self.densityLCD.display(avg_dens)                            # display density on LCD
 
 
-    def update_lcds_AVG(self, data):
+    def update_lcds_CONST(self, data):
         dens_kgm3 = self.density
         dp = data[2]
         vel_mps = (2 * max(dp-self.initDP, 0) / dens_kgm3)**0.5
@@ -336,12 +339,19 @@ class MainWindow(ui_class, base_class):
         self.actualLCD.display(avg_vel)
 
 
+    def quit(self):
+        signal = 0
+        send_pwm(self.console_port, signal)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--avg-mode', action='store_true', help='Use average update')
+    parser.add_argument('--const-mode', action='store_true', help='Use average update')
+    parser.add_argument('--pwmRange-mode', action='store_true', help='Ramps up PWM')
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
-    window = MainWindow(avg_mode=args.avg_mode)
+    window = MainWindow(const_mode=args.const_mode, pwmRange_mode=args.pwmRange_mode)
+    app.aboutToQuit.connect(window.quit)
     window.show()
     sys.exit(app.exec_())

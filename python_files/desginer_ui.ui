@@ -30,7 +30,7 @@
       <x>60</x>
       <y>40</y>
       <width>401</width>
-      <height>301</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="font">
@@ -99,9 +99,9 @@
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>630</y>
+      <y>590</y>
       <width>401</width>
-      <height>181</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="font">
@@ -117,7 +117,7 @@
      <property name="geometry">
       <rect>
        <x>140</x>
-       <y>30</y>
+       <y>40</y>
        <width>42</width>
        <height>22</height>
       </rect>
@@ -136,7 +136,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>30</y>
+       <y>40</y>
        <width>111</width>
        <height>21</height>
       </rect>
@@ -149,7 +149,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>60</y>
+       <y>80</y>
        <width>181</width>
        <height>17</height>
       </rect>
@@ -162,7 +162,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>120</y>
+       <y>140</y>
        <width>211</width>
        <height>17</height>
       </rect>
@@ -175,7 +175,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>90</y>
+       <y>110</y>
        <width>181</width>
        <height>17</height>
       </rect>
@@ -188,7 +188,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>150</y>
+       <y>170</y>
        <width>211</width>
        <height>17</height>
       </rect>
@@ -364,9 +364,9 @@
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>350</y>
+      <y>280</y>
       <width>401</width>
-      <height>271</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="font">
@@ -381,8 +381,8 @@
     <widget class="QLabel" name="label_7">
      <property name="geometry">
       <rect>
-       <x>60</x>
-       <y>40</y>
+       <x>40</x>
+       <y>60</y>
        <width>81</width>
        <height>16</height>
       </rect>
@@ -394,8 +394,8 @@
     <widget class="QLCDNumber" name="tempLCD">
      <property name="geometry">
       <rect>
-       <x>140</x>
-       <y>30</y>
+       <x>120</x>
+       <y>50</y>
        <width>161</width>
        <height>41</height>
       </rect>
@@ -407,8 +407,8 @@
     <widget class="QLabel" name="label_8">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>165</y>
+       <x>10</x>
+       <y>185</y>
        <width>111</width>
        <height>16</height>
       </rect>
@@ -420,8 +420,8 @@
     <widget class="QLabel" name="label_9">
      <property name="geometry">
       <rect>
-       <x>80</x>
-       <y>100</y>
+       <x>60</x>
+       <y>120</y>
        <width>55</width>
        <height>16</height>
       </rect>
@@ -433,8 +433,8 @@
     <widget class="QLCDNumber" name="pressureLCD">
      <property name="geometry">
       <rect>
-       <x>140</x>
-       <y>155</y>
+       <x>120</x>
+       <y>175</y>
        <width>161</width>
        <height>41</height>
       </rect>
@@ -446,8 +446,8 @@
     <widget class="QLCDNumber" name="humLCD">
      <property name="geometry">
       <rect>
-       <x>140</x>
-       <y>90</y>
+       <x>120</x>
+       <y>110</y>
        <width>161</width>
        <height>41</height>
       </rect>
@@ -459,8 +459,8 @@
     <widget class="QLabel" name="label_10">
      <property name="geometry">
       <rect>
-       <x>310</x>
-       <y>170</y>
+       <x>290</x>
+       <y>190</y>
        <width>51</width>
        <height>21</height>
       </rect>
@@ -472,8 +472,8 @@
     <widget class="QLabel" name="label_11">
      <property name="geometry">
       <rect>
-       <x>310</x>
-       <y>40</y>
+       <x>290</x>
+       <y>60</y>
        <width>51</width>
        <height>21</height>
       </rect>
@@ -485,8 +485,8 @@
     <widget class="QLabel" name="label_12">
      <property name="geometry">
       <rect>
-       <x>310</x>
-       <y>100</y>
+       <x>290</x>
+       <y>120</y>
        <width>51</width>
        <height>21</height>
       </rect>
@@ -498,8 +498,8 @@
     <widget class="QLabel" name="label_16">
      <property name="geometry">
       <rect>
-       <x>310</x>
-       <y>225</y>
+       <x>290</x>
+       <y>245</y>
        <width>51</width>
        <height>21</height>
       </rect>
@@ -511,8 +511,8 @@
     <widget class="QLabel" name="label_17">
      <property name="geometry">
       <rect>
-       <x>90</x>
-       <y>220</y>
+       <x>70</x>
+       <y>240</y>
        <width>51</width>
        <height>16</height>
       </rect>
@@ -524,8 +524,8 @@
     <widget class="QLCDNumber" name="densityLCD">
      <property name="geometry">
       <rect>
-       <x>140</x>
-       <y>210</y>
+       <x>120</x>
+       <y>230</y>
        <width>161</width>
        <height>41</height>
       </rect>
@@ -534,14 +534,46 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="LEDWidget" name="label">
+    <widget class="LEDWidget" name="ledWidget">
      <property name="geometry">
       <rect>
-       <x>340</x>
-       <y>10</y>
-       <width>47</width>
-       <height>31</height>
+       <x>335</x>
+       <y>0</y>
+       <width>71</width>
+       <height>41</height>
       </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_18">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>10</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Constant Mode:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>362</x>
+       <y>10</y>
+       <width>51</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
      </property>
      <property name="text">
       <string/>
@@ -600,7 +632,7 @@
   <customwidget>
    <class>LEDWidget</class>
    <extends>QLabel</extends>
-   <header>LEDwidget.py</header>
+   <header>LEDwidget</header>
   </customwidget>
  </customwidgets>
  <resources/>
