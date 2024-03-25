@@ -126,10 +126,10 @@ class MainWindow(ui_class, base_class):
             print("Average Humidity: ", self.humidity)
             print("Average Temperature: ", self.temperature)
 
-            self.tempLCD.display(self.temperature)                                
-            self.pressureLCD.display(self.pressure / 1000)                     
-            self.humLCD.display(self.humidity)                                               
-            self.densityLCD.display(self.density)                      
+        self.tempLCD.display("{:.1f}".format(self.temperature))                        
+        self.pressureLCD.display("{:.1f}".format(self.pressure/1000))                    
+        self.humLCD.display("{:.0f}".format(self.humidity))                          
+        self.densityLCD.display("{:.2f}".format(self.density))                                            
         
 
     def start_plot(self):
@@ -256,6 +256,7 @@ class MainWindow(ui_class, base_class):
             print("Average DP Value:", self.initDP)                  
             self.dp_window = [self.initDP] * self.window_size
 
+
     def setup_timer(self):                                           # timer setup for data collection and updates
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_data)
@@ -314,7 +315,7 @@ class MainWindow(ui_class, base_class):
         avg_temp = sum(self.temp_window) / len(self.temp_window) if self.temp_window else 0
         avg_press = sum(self.press_window) / len(self.press_window) if self.press_window else 0                           
         avg_dp = sum(self.dp_window) / len(self.dp_window) if self.dp_window else 0
-        
+                
         magnitude_vel = np.sqrt(abs(2 * (avg_dp-self.initDP) / avg_dens))
         is_neg_vel = (avg_dp-self.initDP) < 0
         if self.desiredLCD.value() == 0:
@@ -322,11 +323,11 @@ class MainWindow(ui_class, base_class):
         else:
             avg_vel = magnitude_vel * (-1 if is_neg_vel else 1)
 
-        self.tempLCD.display(avg_temp)                               # display temp on LCD
-        self.pressureLCD.display(avg_press)                          # display pressure on LCD
-        self.humLCD.display(avg_hum)                                 # display humidity on LCD
-        self.actualLCD.display(avg_vel)                              # display avg velocity on LCD
-        self.densityLCD.display(avg_dens)                            # display density on LCD
+        self.tempLCD.display("{:.1f}".format(avg_temp))                               # display temp on LCD
+        self.pressureLCD.display("{:.1f}".format(avg_press))                          # display pressure on LCD
+        self.humLCD.display("{:.0f}".format(avg_hum))                                 # display humidity on LCD
+        self.actualLCD.display("{:.2f}".format(avg_vel))                              # display avg velocity on LCD
+        self.densityLCD.display("{:.2f}".format(avg_dens))                            # display density on LCD
 
 
     def update_lcds_FIXED(self, data):                               # function for fixed mode
@@ -344,7 +345,7 @@ class MainWindow(ui_class, base_class):
         else:
             avg_vel = magnitude_vel * (-1 if is_neg_vel else 1)
 
-        self.actualLCD.display(avg_vel)
+        self.actualLCD.display("{:.2f}".format(avg_vel))
 
 
     def quit(self):
