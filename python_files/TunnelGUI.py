@@ -61,8 +61,8 @@ class MainWindow(ui_class, base_class):
         os.makedirs(self.output_folder, exist_ok=True)
 
         # Serial Port Settings
-        self.console_port = serial.Serial('COM9', 115200)           # console port (write)
-        self.data_port = serial.Serial('COM10', 115200)             # data port (read)
+        self.console_port = serial.Serial('COM14', 115200)           # console port (write)
+        self.data_port = serial.Serial('COM15', 115200)             # data port (read)
 
         # Mode Settings
         self.pwmRange_mode = pwmRange_mode                          # Ramps PWM 0-100% if True (for troubleshooting)                         
